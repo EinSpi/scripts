@@ -278,15 +278,20 @@ function Get-SshArguments([string]$RemoteCommand, [switch]$ForStartProcess) {
 
 function Invoke-SshCommand([string]$RemoteCommand) {
     $authState = Push-SshPasswordEnvironment
+    $previousErrorActionPreference = $ErrorActionPreference
     try {
         $sshArgs = Get-SshArguments $RemoteCommand
-        $output = @(& ssh @sshArgs 2>&1)
+        # Windows PowerShell 5.1 会把原生程序的 stderr 包装成 ErrorRecord。
+        # 临时使用 Continue，确保能够读取 ssh 的退出码和完整错误，而不是被全局 Stop 提前中断。
+        $ErrorActionPreference = "Continue"
+        $output = @(& ssh @sshArgs 2>&1 | ForEach-Object { $_.ToString() })
         $exitCode = $LASTEXITCODE
         return [pscustomobject]@{
             ExitCode = $exitCode
             Output = $output
         }
     } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
         Pop-SshPasswordEnvironment $authState
     }
 }
