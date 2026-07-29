@@ -3,6 +3,8 @@
 #   槽位 0：卡 0/1，vLLM 8100/8101，uvicorn 8899
 #   槽位 1：卡 2/3，vLLM 8102/8103，uvicorn 8900
 #   槽位 2：卡 4/5，vLLM 8104/8105，uvicorn 8901
+# TotalDevices 是从 FirstDevice 开始的可用卡数量，不是最大卡号。
+# 后续批次继续使用 8902、8903……，不同超参组合不会复用 uvicorn 端口。
 # 输出统一写入：<项目根目录>\tests\<ExperimentName>\
 $sshPassword = Read-Host "请输入 root SSH 密码" -AsSecureString
 
@@ -29,13 +31,4 @@ $sshPassword = Read-Host "请输入 root SSH 密码" -AsSecureString
 # 脚本默认位于 AISF-VLM-Perception 根目录，因此通常无需传入以下路径：
 # -ProjectRoot "D:\project\2026\26B\伴学评测\AISF-VLM-Perception"
 # -ConfigPath ".\app\common\config.py"
-# -TestPath ".\test\modelTestV7_offline-v1.py"
-
-
-
-
-
-
-
-
-
+# -TestPath ".\tests\modelTestV7_offline-v1.py"

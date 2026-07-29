@@ -514,7 +514,7 @@ if (-not (Test-Path -LiteralPath $ProjectRoot -PathType Container)) {
     throw "项目根目录不存在：$ProjectRoot"
 }
 if ([string]::IsNullOrWhiteSpace($TestPath)) {
-    $TestPath = Join-Path $ProjectRoot "test\modelTestV7_offline-v1.py"
+    $TestPath = Join-Path $ProjectRoot "tests\modelTestV7_offline-v1.py"
 }
 $TestPath = [System.IO.Path]::GetFullPath($TestPath)
 if (-not (Test-Path -LiteralPath $TestPath -PathType Leaf)) {
@@ -593,10 +593,13 @@ if ($DeviceIds.Count -gt 0) {
         throw "-DeviceIds 不能包含重复卡号。"
     }
 } else {
-    if ($FirstDevice -ge $TotalDevices) {
-        throw "-FirstDevice=$FirstDevice 必须小于 -TotalDevices=$TotalDevices。"
+    $lastDevice = $FirstDevice + $TotalDevices - 1
+    if ($lastDevice -gt 1023) {
+        throw "连续资源池的最大卡号超过 1023：FirstDevice=$FirstDevice，TotalDevices=$TotalDevices，最大卡号=$lastDevice。"
     }
-    $devicePool = @($FirstDevice..($TotalDevices - 1))
+    # TotalDevices 表示从 FirstDevice 开始连续可用的卡数量。
+    # 例如 FirstDevice=4、TotalDevices=4，资源池就是 4、5、6、7。
+    $devicePool = @($FirstDevice..$lastDevice)
 }
 
 $slotCapacity = [int][Math]::Floor($devicePool.Count / 2)
